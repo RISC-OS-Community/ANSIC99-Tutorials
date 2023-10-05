@@ -1,0 +1,2 @@
+Set ImageInfo$Dir <Obey$Dir>
+IconSprites <ImageInfo$Dir>.!Sprites
