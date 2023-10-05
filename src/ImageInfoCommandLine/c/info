@@ -1,0 +1,86 @@
+/*
+ * Example ANSI C99 program to given image dimensions from one or more
+ * image files given on the command line as an argument.
+ * This source file iterates over each file given and calls the handlers to
+ * process the image based on their type.
+ *
+ * Copyright: Robert Sprowson 2023, distributed under CDDL v1.1 
+ * SPDX-License-Identifier: CDDL-1.1
+ */
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include "Global/FileTypes.h"
+#include "swis.h"
+
+extern void process_sprite(const char *, uint32_t);
+extern void process_jpeg(const char *, uint32_t);
+
+int main(int argc, char *argv[])
+{
+  size_t i;
+
+  if (argc < 2)
+  {
+    fprintf(stderr, "Usage:   imageinfo <filename> [filename...]\n"
+                    "         show information about an image file\n");
+    return EXIT_FAILURE;
+  }
+
+  for (i = 1; i < argc; i++)
+  {
+    size_t   read;
+    uint32_t filetype, length;
+    uint8_t  buffer[20];
+    FILE    *in;
+
+    /* For each argument passed */
+    printf("File '%s' is ", argv[i]);
+    in = fopen(argv[i], "rb");
+    if (in == NULL)
+    {
+      printf("not found\n");
+    }
+    else
+    {
+      _swix(OS_File, _INR(0,1) | _OUT(4) | _OUT(6), 23, argv[i], &length, &filetype);
+      read = fread(buffer, 1, sizeof(buffer), in);
+      fclose(in);
+      if (read != sizeof(buffer))
+      {
+        printf("too short to be an image file\n");
+      }
+      else
+      {
+        /* Type processing goes here */
+        switch (filetype)
+        {
+          case FileType_Sprite:
+            process_sprite(argv[i], length);
+            break;
+
+          case FileType_JPEG:
+            process_jpeg(argv[i], length);
+            break;
+
+          default:
+            /* Other means to identify a file than by type */
+            if (buffer[6] == 'J' && buffer[7] == 'F' && buffer[8] == 'I' && buffer[9] == 'F')
+            {
+              process_jpeg(argv[i], length);
+              break;
+            }
+            if (buffer[0] == 0xFF && buffer[1] == 0xD8 && buffer[2] == 0xFF)
+            {
+              process_jpeg(argv[i], length);
+              break;
+            }
+            printf("an unknown image type\n");
+            break;
+        }
+      }
+    }
+  }
+  return EXIT_SUCCESS;
+}
