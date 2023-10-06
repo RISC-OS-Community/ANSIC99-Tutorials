@@ -1,0 +1,64 @@
+/*
+ * Example ANSI C99 program to given image dimensions from one or more
+ * image files given on the command line as an argument.
+ * This source file handles RISC OS sprites.
+ *
+ * Copyright: Robert Sprowson 2023, distributed under CDDL v1.1 
+ * SPDX-License-Identifier: CDDL-1.1
+ */
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include "Global/Sprite.h"
+#include "swis.h"
+
+void process_sprite(const char *name, uint32_t length)
+{
+  _kernel_oserror *err;
+  uint32_t *area;
+  char sname[16];
+  uint32_t x, y, snamelen;
+  size_t   i = 1;
+
+  /* Allocate some memory and load the sprite file into it */
+  area = malloc(length + 4);
+  if (area == NULL)
+  {
+    printf("too big to load\n");
+    return;
+  }
+  area[0] = length + 4;
+  area[2] = SpriteCBsize;
+  err = _swix(OS_SpriteOp, _INR(0,1), 256 + SpriteReason_ClearSprites, area);
+  if (err == NULL)
+  {
+    err = _swix(OS_SpriteOp, _INR(0,2), 256 + SpriteReason_LoadSpriteFile, area, name);
+  }
+  if (err != NULL)
+  {
+    printf("an unloadable sprite\n");
+    free(area);
+
+    return;
+  }
+
+  /* Now enumerate the sprites in the file */
+  printf("a sprite file containing:\n");
+  while (err == NULL)
+  {
+    err = _swix(OS_SpriteOp, _INR(0,4) | _OUT(3),
+                256 + SpriteReason_ReturnName, area, sname, sizeof(sname), i,
+                &snamelen);
+    if (err == NULL)
+    {
+      sname[snamelen] = '\0';
+      _swix(OS_SpriteOp, _INR(0,2) | _OUTR(3,4),
+            256 + SpriteReason_ReadSpriteSize, area, sname,
+            &x, &y);
+      printf("  %s is %u x %u pixels\n", sname, x, y);
+    }
+    i++;
+  }
+  free(area);
+}

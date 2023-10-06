@@ -1,0 +1,29 @@
+/*
+ * Example ANSI C99 program to given image dimensions from one or more
+ * image files given on the command line as an argument.
+ * This source file handles compressed JPEGs.
+ *
+ * Copyright: Robert Sprowson 2023, distributed under CDDL v1.1 
+ * SPDX-License-Identifier: CDDL-1.1
+ */
+
+#include <stdio.h>
+#include <stdint.h>
+#include "swis.h"
+
+void process_jpeg(const char *name, uint32_t length)
+{
+  _kernel_oserror *err;
+  uint32_t x, y;
+
+  /* Use the OS to load the JPEG and get its shape */
+  err = _swix(JPEG_FileInfo, _INR(0,1) | _OUTR(2,3), 1, name, &x, &y);
+  if (err == NULL)
+  {
+    printf("a JPEG which is %u x %u pixels\n", x, y);
+  }
+  else
+  {
+    printf("an unloadable JPEG\n");
+  }
+}

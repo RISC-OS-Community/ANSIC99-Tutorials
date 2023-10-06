@@ -2,9 +2,8 @@
  * Simple ANSI C99 program to flash CapsLock LED on the keyboard 
  * and an LED on the GPIO on a Raspberry Pi
  *
- *  Author: Robert Sprowson
- * License: Copyright Robert Sprowson, all rights reserved
- *          distributed under CDDL v1.1
+ * Copyright: Robert Sprowson 2023, distributed under CDDL v1.1 
+ * SPDX-License-Identifier: CDDL-1.1
  */
 
 #include <stdio.h>
