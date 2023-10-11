@@ -12,6 +12,6 @@ Git clone this repository in a way that can be reached by your RISC OS system, i
 
 Then, from your RISC OS system, double click on the !Mk task obey file which is provided. This will use amu (the Acorn Make Utility) to read the Makefile and compile each of the source files in the subdirectory named `c`. The Makefile will then create a standard layout RISC OS application, !ImageInfo.
 
-For a full description of how the code works have a look at this video [here](https://www.youtube.com/watch?v=TBD)
+For a full description of how the code works have a look at this video [here](https://www.youtube.com/watch?v=mlly42c2oe8)
 
 Enjoy!
